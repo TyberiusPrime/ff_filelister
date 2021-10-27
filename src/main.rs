@@ -52,8 +52,8 @@ fn list_dir(path: impl AsRef<Path>) -> Result<String> {
     let p = process::Command::new("rg")
         .args(rg_args)
         .current_dir(path)
-        .output()?;
-    let res = std::str::from_utf8(&p.stdout)?.to_string();
+        .output().context("Failed to run rg")?;
+    let res = std::str::from_utf8(&p.stdout).context("rg output was not utf8")?.to_string();
 
     let lines = res.split("\n");
     let (no_test, test): (Vec<&str>, Vec<&str>) = lines.partition(|x| !x.contains("test"));
@@ -83,7 +83,7 @@ fn inner_main() -> Result<()> {
     }
     let timeout: u32 = str::parse(&args[1]).context("timeout not a number")?;
     let target = &args[2];
-    if !PathBuf::from_str(&target)?.exists() {
+    if !PathBuf::from_str(&target).context("could not cerate path from argument")?.exists() {
         bail!("Could not find target directory {}", target);
     }
 
@@ -94,23 +94,24 @@ fn inner_main() -> Result<()> {
 
     let cache_file = cache_dir.join(result);
     let rebuild = if !cache_file.exists() {
-        let raw = list_dir(&args[1])?;
-        std::fs::write(&cache_file, raw)?;
+        let raw = list_dir(&args[1]).context("failed to listdir")?;
+        std::fs::write(&cache_file, raw).context("failed to write cache_file")?;
         false
     } else {
         true
     };
-    println!("{}", std::fs::read_to_string(&cache_file)?);
+    println!("{}", std::fs::read_to_string(&cache_file).context("failed to read cache_file")?);
 
     //make telescope allow
     unsafe {
         libc::close(1);
     }
     if rebuild {
-        if cache_file.metadata()?.modified()?
+        if cache_file.metadata().context("no cache file metadata")?.modified().context("no cachefile modified time")?
             < SystemTime::now() - std::time::Duration::from_secs(timeout.into())
         {
-            let raw = list_dir(&args[1])?;
+            //update it
+            let raw = list_dir(&args[1]).context("failed to listdir")?;
             std::fs::write(&cache_file, raw)?;
         }
     }
