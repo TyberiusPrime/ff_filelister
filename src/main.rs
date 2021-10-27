@@ -77,17 +77,19 @@ fn inner_main() -> Result<()> {
         .with_context(|| format!("Could not create cache dir {:?}", &cache_dir))?;
 
     let args: Vec<String> = std::env::args().collect();
-    if args.len() != 2 {
-        panic!("Wrong number of arguments")
+    if args.len() != 3 {
+        println!("Wrong number of arguments. Needs to be [timeout_in_seconds] [folder]");
+        std::process::exit(0);
     }
-    let target = &args[1];
+    let timeout: u32 = str::parse(&args[1]).context("timeout not a number")?;
+    let target = &args[2];
     if !PathBuf::from_str(&target)?.exists() {
         bail!("Could not find target directory {}", target);
     }
 
     let mut hasher = Sha1::new();
     // process input message
-    hasher.update(args[1].as_bytes());
+    hasher.update(target.as_bytes());
     let result = format!("{:x}", hasher.finalize());
 
     let cache_file = cache_dir.join(result);
@@ -98,7 +100,7 @@ fn inner_main() -> Result<()> {
     } else {
         true
     };
-    print!("{}\n", std::fs::read_to_string(&cache_file)?);
+    println!("{}", std::fs::read_to_string(&cache_file)?);
 
     //make telescope allow
     unsafe {
@@ -106,7 +108,7 @@ fn inner_main() -> Result<()> {
     }
     if rebuild {
         if cache_file.metadata()?.modified()?
-            < SystemTime::now() - std::time::Duration::from_secs(60 * 5)
+            < SystemTime::now() - std::time::Duration::from_secs(timeout.into())
         {
             let raw = list_dir(&args[1])?;
             std::fs::write(&cache_file, raw)?;
