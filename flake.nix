@@ -3,6 +3,12 @@
     utils.url = "github:numtide/flake-utils";
     naersk.url = "github:nmattia/naersk";
     rust-overlay.url = "github:oxalica/rust-overlay";
+    nixpkgs = {
+      url =
+        "github:NixOS/nixpkgs?rev=7e9b0dff974c89e070da1ad85713ff3c20b0ca97"; # that's 21.05
+
+    };
+
     #mozillapkgs = {
     #url = "github:mozilla/nixpkgs-mozilla";
     #flake = false;
@@ -19,7 +25,7 @@
         rust = pkgs.rust-bin.stable."1.56.0".default.override {
           extensions = [ "rustfmt" "clippy" ];
 
-#          targets = [ "x86_64-unknown-linux-musl" ];
+          #          targets = [ "x86_64-unknown-linux-musl" ];
         };
 
         # Override the version used in naersk
@@ -32,6 +38,12 @@
         packages.my-project = naersk-lib.buildPackage {
           pname = "ff_filelister";
           root = ./.;
+          buildInput = [ pkgs.ripgrep pkgs.breakpointHook ];
+          overrideMain = old: {
+            postUnpack = ''
+              substituteInPlace /build/source/src/main.rs --replace "/usr/bin/rg" "${pkgs.ripgrep}/bin/rg"
+            '';
+          };
         };
         defaultPackage = packages.my-project;
 
@@ -42,7 +54,8 @@
         # `nix develop`
         devShell = pkgs.mkShell {
           # supply the specific rust version
-          nativeBuildInputs = [ rust  pkgs.rust-analyzer pkgs.git pkgs.cargo-udeps];
+          nativeBuildInputs =
+            [ rust pkgs.rust-analyzer pkgs.git pkgs.cargo-udeps ];
         };
       });
 }

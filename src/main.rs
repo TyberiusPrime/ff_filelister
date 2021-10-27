@@ -49,10 +49,10 @@ fn list_dir(path: impl AsRef<Path>) -> Result<String> {
         "40",
         "--files",
     ];
-    let p = process::Command::new("rg")
+    let p = process::Command::new("/usr/bin/rg")
         .args(rg_args)
         .current_dir(path)
-        .output().context("Failed to run rg")?;
+        .output().context("Failed to run /usr/bin/rg")?;
     let res = std::str::from_utf8(&p.stdout).context("rg output was not utf8")?.to_string();
 
     let lines = res.split("\n");
@@ -94,7 +94,7 @@ fn inner_main() -> Result<()> {
 
     let cache_file = cache_dir.join(result);
     let rebuild = if !cache_file.exists() {
-        let raw = list_dir(&args[1]).context("failed to listdir")?;
+        let raw = list_dir(&target).context("failed to listdir")?;
         std::fs::write(&cache_file, raw).context("failed to write cache_file")?;
         false
     } else {
@@ -111,7 +111,7 @@ fn inner_main() -> Result<()> {
             < SystemTime::now() - std::time::Duration::from_secs(timeout.into())
         {
             //update it
-            let raw = list_dir(&args[1]).context("failed to listdir")?;
+            let raw = list_dir(&target).context("failed to listdir")?;
             std::fs::write(&cache_file, raw)?;
         }
     }
