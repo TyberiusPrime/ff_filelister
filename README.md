@@ -1,5 +1,6 @@
-I'm using [telescope.nvim](https://github.com/nvim-telescope/) over sshfs,
-which can be *very* laggy (15 seconds for a smallish project for calling 'rg --files' isn't unusual),
+I'm using [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) over sshfs,
+which can be *very* laggy (15 seconds for a smallish project for calling 'rg --files' isn't unusual, 
+see https://github.com/nvim-telescope/telescope.nvim/issues/1331),
 and telescope fails when data comes in chunks.
 
 This caches the rg output (tuned to my list of filetypes I want to see) in
