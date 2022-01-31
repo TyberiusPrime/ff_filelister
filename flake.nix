@@ -3,6 +3,8 @@
     utils.url = "github:numtide/flake-utils";
     naersk.url = "github:nmattia/naersk";
     rust-overlay.url = "github:oxalica/rust-overlay";
+    naersk.inputs.nixpkgs.follows = "nixpkgs";
+    rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
     nixpkgs = {
       url =
         "github:NixOS/nixpkgs?rev=7e9b0dff974c89e070da1ad85713ff3c20b0ca97"; # that's 21.05
