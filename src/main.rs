@@ -39,6 +39,8 @@ fn list_dir(path: impl AsRef<Path>) -> Result<String> {
         "txt",
         "--type",
         "nix",
+        "--type",
+        "ts",
         "-g!code/venv",
         "-g!results",
         "-g!cache",
