@@ -58,11 +58,11 @@ fn list_dir(path: impl AsRef<Path>, rg_args: Option<Vec<String>>) -> Result<Stri
             "--files",
         ].iter().map(|x| x.to_string()).collect()
     };
-    let p = process::Command::new("/usr/bin/rg")
+    let p = process::Command::new("rg")
         .args(rg_args)
         .current_dir(path)
         .output()
-        .context("Failed to run /usr/bin/rg")?;
+        .context("Failed to run rg - is it in path")?;
     let res = std::str::from_utf8(&p.stdout)
         .context("rg output was not utf8")?
         .to_string();
@@ -102,18 +102,21 @@ fn inner_main() -> Result<()> {
     {
         bail!("Could not find target directory {}", target);
     }
+    let mut hasher = Sha1::new();
     let rg_args = if args.len() > 3 {
-        if &args[3] != "--" {
+        if &args[3] == "--" {
             let r: Vec<String> = (&args[4..]).iter().map(|x| x.to_string()).collect();
+            for arg in r.iter() {
+                hasher.update(arg.as_bytes())
+            }
             Some(r)
         } else {
-            bail!("if passing in rg arguments, third argument must be \"--\"");
+            bail!("if passing in rg arguments, third argument must be \"--\", was {}", &args[3]);
         }
     } else {
         None
     };
 
-    let mut hasher = Sha1::new();
     // process input message
     hasher.update(target.as_bytes());
     let result = format!("{:x}", hasher.finalize());

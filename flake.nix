@@ -45,9 +45,9 @@
         root = ./.;
         buildInput = [pkgs.ripgrep pkgs.breakpointHook];
         overrideMain = old: {
-          postUnpack = ''
-            substituteInPlace /build/source/src/main.rs --replace "/usr/bin/rg" "${pkgs.ripgrep}/bin/rg"
-          '';
+          # postUnpack = ''
+          #   substituteInPlace /build/source/src/main.rs --replace "/usr/bin/rg" "${pkgs.ripgrep}/bin/rg"
+          # '';
         };
       };
       defaultPackage = packages.my-project;
