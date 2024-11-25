@@ -7,7 +7,7 @@
     rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
     #rust-overlay.inputs.flake-utils.follows = "nixpkgs";
     nixpkgs = {
-      url = "github:NixOS/nixpkgs?rev=7e9b0dff974c89e070da1ad85713ff3c20b0ca97"; # that's 21.05
+      url = "github:NixOS/nixpkgs/nixos-24.11"; # that's 21.05
     };
 
     #mozillapkgs = {
@@ -27,7 +27,7 @@
       #pkgs = nixpkgs.legacyPackages."${system}";
       overlays = [(import rust-overlay)];
       pkgs = import nixpkgs {inherit system overlays;};
-      rust = pkgs.rust-bin.stable."1.56.0".default.override {
+      rust = pkgs.rust-bin.stable."1.81.0".default.override {
         extensions = ["rustfmt" "clippy"];
 
         #          targets = [ "x86_64-unknown-linux-musl" ];
